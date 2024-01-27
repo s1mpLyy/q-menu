@@ -6,11 +6,11 @@
     <div class="fixed inset-0 top-4 z-0 px-4">
       <div class="inline-flex items-center gap-4">
         <div
-          class="bg-gray-300 w-28 h-28 animate-pulse rounded-full mx-auto transition-all duration-500 ease-in-out"
+          class="bg-gray-300 w-28 h-28 animate-pulse rounded-full mx-auto transition-all duration-200 ease-in-out"
           :class="yScroll > 60 ? 'w-14 h-14' : ''"
         ></div>
         <h1
-          class="text-center text-xl font-semibold transition-all duration-500 ease-in-out"
+          class="text-center text-xl font-semibold transition-all duration-200 ease-in-out"
           :class="yScroll > 40 ? 'text-base' : ''"
         >
           Resturant Name - Menu
