@@ -1,23 +1,33 @@
 <template>
   <div
+    v-if="!pending"
     id="IndexPageLayout"
     class="grid grid-cols-1 gap-4 bg-gray-100 min-h-screen"
   >
-    <div class="fixed inset-0 top-4 z-0 px-4">
+    <div class="fixed inset-0 top-3 z-0 px-4">
       <div class="inline-flex items-center gap-4">
         <div
-          class="bg-gray-300 animate-pulse rounded-full mx-auto transition-all duration-200 ease-in-out"
-          :class="yScroll > 60 ? 'w-14 h-14' : 'w-28 h-28'"
-        ></div>
+          class="bg-gray-300 animate-pulse rounded-full mx-auto transition-all duration-200 ease-in-out flex items-center justify-center"
+          :class="yScroll > 60 ? 'w-14 h-14 text-xs' : 'w-20 h-20 text-sm'"
+        >
+          Logo
+        </div>
         <h1
           class="text-center font-semibold transition-all duration-200 ease-in-out"
           :class="yScroll > 40 ? 'text-base' : 'text-xl'"
         >
-          Resturant Name - Menu
+          {{ menuData.restaurant }} - {{ menuData.name }}
         </h1>
       </div>
-
-      <div class="w-full h-28 bg-gray-300 animate-pulse rounded-lg"></div>
+      <img
+        src="/test.png"
+        class="max-h-36 object-cover object-center rounded-lg w-full mt-2"
+        alt=""
+      />
+      <!-- <div
+        class="w-full h-28 bg-gray-300 rounded-lg mt-2 bg-cover bg-center"
+        style="background-image: url('/test.png')"
+      ></div> -->
     </div>
     <div class="flex flex-col gap-4 bg-gray-50 rounded-2xl z-10 mt-64">
       <section id="categories" class="sticky top-0 bg-gray-50 shadow-md z-10">
@@ -35,7 +45,7 @@
         </div>
         <div
           class="flex items-center justify-between px-4 py-2 transition-all ease-linear duration-300"
-          :class="yScroll > 200 ? 'h-0 hidden' : 'h-10'"
+          :class="yScroll > 200 ? 'h-0 hidden opacity-0' : 'h-10 opacity-100'"
         >
           <p class="font-medium text-lg">Categories</p>
           <p class="underline">See all</p>
@@ -44,35 +54,77 @@
         <div
           class="w-full inline-flex gap-3 pb-2 items-center flex-nowrap overflow-hidden overflow-x-scroll px-4"
         >
-          <div
-            v-for="(category, indexOfCategory) in categories"
+          <NuxtLink
+            v-for="(category, indexOfCategory) in menuData.categories"
             :key="indexOfCategory"
-            class="px-3 py-2 inline-flex items-center justify-center gap-2 min-w-[90px] max-w-max rounded-lg shadow-sm"
+            class="px-3 py-2 inline-flex items-center justify-center gap-2 min-w-min w-max max-w-max rounded-lg shadow-sm"
             :class="
-              category.title === currentSelectedCategory
+              category.name === currentSelectedCategory
                 ? 'bg-gray-200'
                 : 'bg-white'
             "
-            @click="currentSelectedCategory = category.title"
+            :to="`#${category.id}`"
+            @click="goToCategory(category.name, category.id)"
           >
             <img
+              v-if="category.image"
               :src="category.image"
               class="w-5 h-5 object-cover object-center"
               alt=""
             />
-            <span
+            <p
+              class="whitespace-nowrap"
               :class="
-                category.title === currentSelectedCategory
+                category.name === currentSelectedCategory
                   ? 'text-green-900'
                   : 'text-black'
               "
-              >{{ category.title }}</span
             >
-          </div>
+              {{ category.name }}
+            </p>
+          </NuxtLink>
         </div>
       </section>
-      <section id="items" class="p-4 grid grid-cols-2 gap-4">
+      <section id="items" class="p-4 grid grid-cols-1 gap-4">
         <div
+          v-for="(itemsInCategory, indexOfItemCategory) in menuData.categories"
+          :key="indexOfItemCategory"
+          class="grid grid-cols-1 gap-2 relative"
+        >
+          <div :id="itemsInCategory.id" class="absolute inset-0 -mt-36"></div>
+          <h2 class="font-medium capitalize">
+            {{ itemsInCategory.name }}
+          </h2>
+          <div class="grid grid-cols-2 gap-2">
+            <div
+              v-for="(item, indexOfCategory) in itemsInCategory.food_items"
+              :key="indexOfCategory"
+              class="bg-white shadow rounded-2xl overflow-hidden cursor-pointer"
+            >
+              <div class="relative">
+                <img
+                  :src="item.thumbnail"
+                  class="w-full bg-cover bg-center object-cover object-center max-h-44 min-h-44"
+                  alt=""
+                  style="
+                    background-image: url('https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png');
+                  "
+                />
+              </div>
+
+              <div class="flex flex-wrap justify-between p-2">
+                <p class="capitalize font-medium text-sm w-full pb-1">
+                  {{ item.name }}
+                </p>
+                <span class="font-semibold text-sm">{{
+                  item.price + " IQD"
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div
           v-for="(item, indexOfCategory) in items"
           :key="indexOfCategory"
           class="grid grid-cols-1 bg-white shadow rounded-2xl overflow-hidden cursor-pointer"
@@ -96,19 +148,25 @@
             </p>
             <span class="font-semibold text-sm">{{ item.price }}</span>
           </div>
-        </div>
+        </div> -->
       </section>
     </div>
   </div>
 </template>
 
 <script setup>
-const data = await useFetch("https://robot-iraq.com/api/menu", {
-  server: false,
+const { data, pending } = await useFetch("https://robot-iraq.com/api/menu", {
   method: "GET",
 });
-console.log({ data });
-const currentSelectedCategory = ref("All");
+if (!pending.value) console.log({ data: data.value });
+
+const menuData = computed(() => {
+  if (!pending.value && data.value.menus) {
+    return data.value.menus[0];
+  }
+  return {};
+});
+const currentSelectedCategory = ref("Shisha");
 const yScroll = ref(0);
 const items = ref([
   {
@@ -268,15 +326,24 @@ const categories = ref([
 function detectScroll() {
   window.onscroll = function () {
     // Get the scroll position
+    if (yScroll.value >= 200 && yScroll.value <= 210)
+      return setTimeout(() => (yScroll.value = window.scrollY), 100);
     var scrollPosition = window.scrollY;
-    console.log(`User Scroll : ${scrollPosition},,,var-__${yScroll.value}`);
     yScroll.value = scrollPosition;
+
     return scrollPosition;
   };
 }
 onMounted(() => {
   detectScroll();
 });
+function goToCategory(name, id) {
+  currentSelectedCategory.value = name;
+}
 </script>
 
-<style></style>
+<style>
+* {
+  scroll-behavior: smooth;
+}
+</style>
