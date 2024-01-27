@@ -7,7 +7,7 @@
       <div class="inline-flex items-center gap-4">
         <div
           class="bg-gray-300 w-28 h-28 animate-pulse rounded-full mx-auto transition-all duration-500 ease-in-out"
-          :class="[yScroll > 60 ? 'w-14 h-14' : '']"
+          :class="yScroll > 60 ? 'w-14 h-14' : ''"
         ></div>
         <h1
           class="text-center text-xl font-semibold transition-all duration-500 ease-in-out"
@@ -61,7 +61,7 @@
         <div
           v-for="(item, indexOfCategory) in items"
           :key="indexOfCategory"
-          class="grid grid-cols-1 bg-white shadow rounded-2xl overflow-hidden min-w-[200px] cursor-pointer"
+          class="grid grid-cols-1 bg-white shadow rounded-2xl overflow-hidden cursor-pointer"
         >
           <div class="relative">
             <div class="absolute top-2 left-2">
@@ -71,9 +71,7 @@
             </div>
             <img
               :src="item.image"
-              width="200"
-              height="220"
-              class="object-cover object-center"
+              class="w-full object-cover object-center"
               alt=""
             />
           </div>
