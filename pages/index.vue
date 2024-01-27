@@ -336,6 +336,7 @@ function detectScroll() {
 }
 onMounted(() => {
   detectScroll();
+  // pew
 });
 function goToCategory(name, id) {
   currentSelectedCategory.value = name;
